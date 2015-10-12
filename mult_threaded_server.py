@@ -1,35 +1,23 @@
-import os, sys, thread, socket, pdb
+from socket import AF_INET, SOCK_STREAM, socket
+from concurrent.futures import ThreadPoolExecutor
 
-def main():
-    port = 8080
-    host = ''               
-   # print "Proxy Server Running on ",host,":",port
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        
-        s.bind((host, port))
+def server_handler(sock, client_addr):
+    print('Got connection from', client_addr)
+    while True:
+        msg = sock.recv(65536)
+        if not msg:
+            break
+        sock.sendall(msg)
+    print('Client closed connection')
+    sock.close()
 
-        s.listen(50)
-    
-    except socket.error, (value, message):
-        if s:
-            s.close()
-        print "Could not open socket:", message
-        sys.exit(1)
+def server(addr):
+    pool = ThreadPoolExecutor(5)
+    sock = socket(AF_INET, SOCK_STREAM)
+    sock.bind(addr)
+    sock.listen(5)
+    while True:
+        client_sock, client_addr = sock.accept()
+        pool.submit(echo_client, client_sock, client_addr)
 
-    while 1:
-        conn, client_addr = s.accept()
-       
-        thread.start_new_thread(server_handler, (conn, client_addr))
-        
-    s.close()
-      
-
-def server_handler(conn, client_addr):
-   
-    request = conn.recv(4096) 
-    conn.close()
-    sys.exit(1)
-        
-if __name__ == '__main__':
-    main()
+server(('',15000))
