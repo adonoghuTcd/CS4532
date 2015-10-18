@@ -29,20 +29,6 @@ def server_handler(sock, client_addr):
 def server(port):
     pool = ThreadPoolExecutor(5)
     sock = socket(AF_INET, SOCK_STREAM)
-    sock.bind(('', 8000))
-    sock.listen(5)
-    while True:
-        client_sock, client_addr = sock.accept()
-        result = pool.submit(server_handler, client_sock, client_addr)
-       	if result.result() == "exit":
-            print("Killing service")
-            sys.exit()
-server(('',int(sys.argv[1])))
-
-
-def server(port):
-    pool = ThreadPoolExecutor(5)
-    sock = socket(AF_INET, SOCK_STREAM)
     sock.bind(port)
     sock.listen(5)
     while True:
