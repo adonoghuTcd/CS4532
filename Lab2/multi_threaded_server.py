@@ -1,10 +1,11 @@
-from socket import AF_INET, SOCK_STREAM, socket
+from socket import AF_INET, SOCK_STREAM, gethostname, gethostbyname, socket
 from concurrent.futures import ThreadPoolExecutor
 import sys, pdb, time
 
 def server_handler(sock, client_addr):
     LF = "\n"
     print('Got connection from', client_addr)
+
     msgbytes = sock.recv(256)
     msg = msgbytes.decode('utf-8')
     if 'KILL_SERVICE' in msg:
@@ -12,23 +13,23 @@ def server_handler(sock, client_addr):
         return "exit"
     elif "HELO"  in msg:
         response = [
-            msg,
-            "IP:"+client_addr,
+            "IP: "+gethostbyname(gethostname()),
             "Port:"+sys.argv[1],
             "StudentID:aa2d8671e0b9698d706dd81e9fdf63205dcaa89b2926e5df2ec7a594b66861ba",
-            ""
             ]
-        socket.sendall(LF.join(response))
+        fullResponse = (msg + LF.join(response))
+        sock.send(fullResponse.encode('utf-8'))
         sock.close()
     else:
         print(msg)
+        sock.close()
     print('Client closed connection')
     sock.close()
 
 def server(port):
-    pool = ThreadPoolExecutor(5)
+    pool = ThreadPoolExecutor(8)
     sock = socket(AF_INET, SOCK_STREAM)
-    sock.bind(port)
+    sock.bind((gethostname(), port))
     sock.listen(5)
     while True:
         client_sock, client_addr = sock.accept()
@@ -36,4 +37,4 @@ def server(port):
        	if result.result() == "exit":
             print("Killing service")
             sys.exit()
-server(('',int(sys.argv[1])))
+server(int(sys.argv[1]))
