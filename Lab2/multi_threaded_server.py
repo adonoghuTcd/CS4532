@@ -13,7 +13,7 @@ def server_handler(sock, client_addr):
         return "exit"
     elif "HELO"  in msg:
         response = [
-            "IP: "+gethostbyname(gethostname()),
+            "IP:"+gethostname(),
             "Port:"+sys.argv[1],
             "StudentID:aa2d8671e0b9698d706dd81e9fdf63205dcaa89b2926e5df2ec7a594b66861ba",
             ]
