@@ -19,10 +19,8 @@ def server_handler(sock, client_addr):
             ]
         fullResponse = (msg + LF.join(response))
         sock.send(fullResponse.encode('utf-8'))
-        sock.close()
     else:
         print(msg)
-        sock.close()
     print('Client closed connection')
     sock.close()
 
